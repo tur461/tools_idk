@@ -1,0 +1,43 @@
+{{- if .Values.session_key_check.enabled }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: polkadot-session-key-check
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: {{ .Values.session_key_check.cron_schedule }}
+  concurrencyPolicy:  Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: polkadot-session-key-check
+        spec:
+          nodeSelector:
+ {{ toYaml .Values.node_selector | indent 12 }}
+          containers:
+          - name: polkadot-session-key-check
+            image: {{ .Values.polkadot_k8s_images.polkadot_session_key_check }}
+            env:
+            - name: "SLACK_ALERT_TOKEN"
+              valueFrom:
+                secretKeyRef:
+                  name: polkadot-val-secrets
+                  key: slack-alert-token
+            - name: "STASH_ACCOUNT_ADDRESS"
+              value: "{{ .Values.session_key_check.stash_account_address }}"
+            - name: "STASH_ACCOUNT_ALIAS"
+              value: "{{ .Values.session_key_check.stash_account_alias }}"
+            - name: "SLACK_ALERT_CHANNEL"
+              value: "{{ .Values.session_key_check.slack_alert_channel }}"
+            - name: "NODE_ENDPOINT"
+              value: "private-node"
+            - name: "CHAIN"
+              value: "{{ .Values.chain }}"
+            resources:
+              limits:
+                cpu: 0
+            imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
+{{- end }}

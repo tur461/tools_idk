@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@polkadot/api": "^8.12.2",
+    "@polkadot/types": "^8.13.1",
+    "@slack/web-api": "^6.6.0",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "npx tsc -d"
+  }
+}
